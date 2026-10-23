@@ -18,10 +18,22 @@ handler_helper.indexable_parent_types = {
    ["function_name"] = true,
 }
 
+
+
+
+
+
+function handler_helper.is_invoked_completion(params)
+   local context = params.context
+   return context == nil or
+   context.triggerKind == lsp.completion_trigger_kind.Invoked
+end
+
 function handler_helper.get_node_info(document_manager, params, pos)
    local context = params.context
 
-   if context and context.triggerKind ~= lsp.completion_trigger_kind.TriggerCharacter then
+   if context and context.triggerKind ~= lsp.completion_trigger_kind.TriggerCharacter and
+      context.triggerKind ~= lsp.completion_trigger_kind.Invoked then
       logger:info("Ignoring completion request given kind: %s", context.triggerKind)
       return nil
    end
@@ -38,7 +50,9 @@ function handler_helper.get_node_info(document_manager, params, pos)
    local node_info = doc:tree_sitter_token(pos.line, pos.character)
    if node_info == nil then
       logger:info("Unable to retrieve node info from tree-sitter parser")
-      return nil
+
+
+      return nil, doc
    end
    logger:debug("Found node info: %s", node_info)
    return node_info, doc
