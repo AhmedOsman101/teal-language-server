@@ -297,6 +297,17 @@ function LspClient:get_completions_triggered(uri, line, character, trigger_char)
     return self:wait_for_response(id)
 end
 
+-- For explicitly invoked completions (no trigger character): e.g. Zed sends
+-- triggerKind = Invoked for typed text and explicit requests alike
+function LspClient:get_completions_invoked(uri, line, character)
+    local id = self:request("textDocument/completion", {
+        textDocument = { uri = uri },
+        position = { line = line, character = character },
+        context = { triggerKind = 1 },
+    })
+    return self:wait_for_response(id)
+end
+
 function LspClient:get_hover(uri, line, character)
     local id = self:request("textDocument/hover", {
         textDocument = { uri = uri },
